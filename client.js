@@ -49,7 +49,7 @@ export const client = async () => {
 
               try {
                 if (msg.type === "project") {
-                  const channel = await guild.channels.create({
+                  const projectChannel = await guild.channels.create({
                     name: msg.projectTitle,
                     type: 0,
                     parent: "1246232415165218816",
@@ -57,9 +57,26 @@ export const client = async () => {
                   });
 
                   // send msg to channel
-                  await channel.send(
+                  await projectChannel.send(
                     "هەموو ئەرکەکانی تایبەت بەم پرۆجێکتە لێرە دەبن"
                   );
+                } else if (msg.type === "task") {
+                  const taskChannel = await guild.channels.cache.find(
+                    (channel) => channel.name === msg.projectTitle
+                  );
+
+                  taskChannel.send(
+                    `-----------------------------\nId : ${msg.taskId}\nTitle: ${msg.taskTitle}\n Description: ${msg.content}\nReporter: ${msg.reporter} Assignee: ${msg.assignee}\n-----------------------------`
+                  );
+
+                  // send msg to channel
+
+                  //              taskId: created._id,
+                  // taskTitle: created.title,
+                  // content: created.description,
+                  // projectTitle: project.title,
+                  // reporter: taskDoc.reporter.fullName,
+                  // assignee: taskDoc.assignee.fullName,
                 }
               } catch (error) {
                 console.log(error);
@@ -68,8 +85,6 @@ export const client = async () => {
           },
           { noAck: true }
         );
-
-        console.log(" [*] Waiting for messages. To exit press CTRL+C");
       } catch (err) {
         console.warn(err);
       }
