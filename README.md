@@ -1,2 +1,3 @@
-# tag-application-bot
-A discord bot I made for our game team (iDF).
+# tsm-bot
+
+A discord bot made to work as a notification middleware between discord and my nestjs app
