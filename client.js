@@ -1,10 +1,5 @@
-import {
-  Client,
-  GatewayIntentBits,
-  Partials,
-  ApplicationCommandOptionType,
-  Events,
-} from "discord.js";
+import { Client, GatewayIntentBits, Partials, Events } from "discord.js";
+import amqp from "amqplib";
 
 export const client = async () => {
   const client = new Client({
@@ -32,19 +27,53 @@ export const client = async () => {
     } else {
       commands = client?.application.commands;
     }
+    (async () => {
+      const queue = "botQueue";
+      try {
+        const connection = await amqp.connect("amqp://localhost");
+        const channel = await connection.createChannel();
 
-    // commands?.create({
-    //   name: "vote",
-    //   description: "vote for user",
-    //   options: [
-    //     {
-    //       name: "username",
-    //       required: true,
-    //       description: "username of the user to vote for",
-    //       type: ApplicationCommandOptionType.User,
-    //     },
-    //   ],
-    // });
+        process.once("SIGINT", async () => {
+          await channel.close();
+          await connection.close();
+        });
+
+        await channel.assertQueue(queue, { durable: false });
+        await channel.consume(
+          queue,
+          async (message) => {
+            if (message) {
+              const msg = JSON.parse(message.content.toString());
+
+              console.log(msg);
+
+              try {
+                if (msg.type === "project") {
+                  const channel = await guild.channels.create({
+                    name: msg.projectTitle,
+                    type: 0,
+                    parent: "1246232415165218816",
+                    // your permission overwrites or other options here
+                  });
+
+                  // send msg to channel
+                  await channel.send(
+                    "هەموو ئەرکەکانی تایبەت بەم پرۆجێکتە لێرە دەبن"
+                  );
+                }
+              } catch (error) {
+                console.log(error);
+              }
+            }
+          },
+          { noAck: true }
+        );
+
+        console.log(" [*] Waiting for messages. To exit press CTRL+C");
+      } catch (err) {
+        console.warn(err);
+      }
+    })();
   });
 
   client.on(Events.MessageCreate, async (msg) => {});
